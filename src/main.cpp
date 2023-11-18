@@ -80,9 +80,11 @@ int main()
 
     csv_out << "Meses,Matrizes,Cabritos\n";
 
-    for (int i = 0; i < 12*3; i++)
+    for (int i = 0; i < 12*30; i++)
     {
         auto step = simulation.step();
         csv_out << fmt::format("{},{},{}\n", step.delta_t_meses, step.matrizes.size(), step.cabritos.size());
     }
+
+    csv_out.close();
 }
