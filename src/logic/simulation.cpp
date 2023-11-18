@@ -21,7 +21,6 @@ SimulationStep Simulation::step()
         {
             if (cabrito.genero == Cabrito::CabritoGenero::FEMEA && matrizes.size() < max_matrizes)
             {
-                spdlog::warn("creating matriz");
                 matrizes.push_back(Matriz::Matriz());
             } else {
                 saída++;
@@ -46,7 +45,6 @@ SimulationStep Simulation::step()
         );
         if (matriz.idade >= tempo_vida_matriz_meses || RNG::CheckAlive(morte_mensal_matrizes_frac))
         {
-            spdlog::warn("apagando matriz");
             matrizes.erase(matrizes.begin() + i);
         }
     }
