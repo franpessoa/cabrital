@@ -28,5 +28,4 @@ struct Simulation
     const double_t morte_mensal_matrizes_frac;
     
     SimulationStep step();
-    SimulationStep step_for_meses(uint32_t meses);
 };

@@ -69,8 +69,6 @@ int main()
     spdlog::info("Built simulation struct");
     spdlog::info("Starting simulation");
 
-    simulation.step_for_meses(12 * 30);
-
     std::ofstream csv_out;
 
     // Get the NAME FOR THE FILE, fuck C++
@@ -82,8 +80,9 @@ int main()
 
     csv_out << "Meses,Matrizes,Cabritos\n";
 
-    for (auto& step : simulation.steps)
+    for (int i = 0; i < 12*3; i++)
     {
+        auto step = simulation.step();
         csv_out << fmt::format("{},{},{}\n", step.delta_t_meses, step.matrizes.size(), step.cabritos.size());
     }
 }

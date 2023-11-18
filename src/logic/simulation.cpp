@@ -56,13 +56,3 @@ SimulationStep Simulation::step()
 
     return step;
 };
-
-SimulationStep Simulation::step_for_meses(uint32_t meses)
-{
-    for (int i = 0; i < meses; i++)
-    {   
-        step();
-    }
-
-    return {.cabritos = cabritos, .matrizes = matrizes, .saída_mensal = saída};
-};
