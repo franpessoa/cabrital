@@ -1,8 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <stdbool.h>
-#include <random>
-#include <chrono>
 
 namespace Cabrito 
 {
