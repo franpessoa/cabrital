@@ -4,8 +4,7 @@
 #include <vector>
 #include <iterator>
 #include <spdlog/spdlog.h>
-#include <fmt/core.h>
-
+#include "fmt/core.h"
 SimulationStep Simulation::step()
 {
     saída = 0;

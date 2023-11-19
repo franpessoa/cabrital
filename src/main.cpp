@@ -1,3 +1,4 @@
+#define FMT_HEADER_ONLY
 #include "logic/cabrito.hpp"
 #include "logic/matriz.hpp"
 #include "logic/rng.hpp"
@@ -86,7 +87,7 @@ int main(int argc, char** argv)
         .morte_mensal_matrizes_frac = morte_mensal_matrizes_frac
     };
 
-    spdlog::info("Built simulation struct");
+    spdlog::info("Built simulation strucst");
     spdlog::info("Starting simulation");
 
     std::ofstream csv_out;
