@@ -1,5 +1,5 @@
 #pragma once
-#include "simulation.hpp"
+#include "logic/simulation.hpp"
 #include <toml.hpp>
 #include <string>
 
