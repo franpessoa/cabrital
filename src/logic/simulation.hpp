@@ -8,6 +8,8 @@ struct SimulationStep
     std::vector<Matriz::Matriz> matrizes;
     uint32_t saída_mensal;
     uint32_t delta_t_meses;
+    uint32_t abates_macho;
+    uint32_t abates_femea;
 };
 
 struct SimulationConfig
@@ -19,6 +21,7 @@ struct SimulationConfig
     const uint32_t max_matrizes;
     const uint32_t tempo_vida_matriz_meses;
     const double_t morte_mensal_matrizes_frac;
+    const uint32_t tempo_simulacao;
 };
 
 struct SimulationEntities
@@ -32,8 +35,6 @@ struct Simulation
     std::vector<SimulationStep> steps = {};
 
     uint32_t delta_t_meses = {0};
-
-    uint32_t saída = {0};
 
     SimulationConfig cfg;
     SimulationEntities entities;
