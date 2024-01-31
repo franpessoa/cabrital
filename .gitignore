@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 build
 .vscode
 sim*
 config.toml
+=======
+/target
+*.csv
+*.zip
+>>>>>>> rewrite/rust
