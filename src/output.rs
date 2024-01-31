@@ -1,3 +1,4 @@
+/// Escreve o nome das colunas no arquivo
 pub fn write_head<W: std::io::Write>(writer: &mut csv::Writer<W>) -> Result<(), csv::Error> {
     writer.write_record([
         "Mês",
@@ -13,6 +14,7 @@ pub fn write_head<W: std::io::Write>(writer: &mut csv::Writer<W>) -> Result<(), 
     ])
 }
 
+/// Escreve o equivalente a um mês no arquivo
 pub fn write_record<W: std::io::Write>(
     writer: &mut csv::Writer<W>,
     record: crate::simulation::SimulationStep,
