@@ -37,7 +37,7 @@ impl Cabrito {
 
         if self.age >= env.config.idade_abate_cabrito {
             if self.can_matriz(env) {
-                return Some(SimEvento::NewMatriz(Matriz::new(self.age), *self));
+                return Some(SimEvento::NovaMatriz(Matriz::new(self.age), *self));
             } else {
                 return Some(SimEvento::Abate(*self));
             }

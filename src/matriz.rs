@@ -4,18 +4,22 @@ use crate::{
 };
 use rand::{thread_rng, Rng};
 
+/// Representa o estado da matriz, que pode ser prenha ou amamentando
 #[derive(Debug, PartialEq, Clone)]
 pub enum MatrizEstado {
     Prenha(usize),
     Amamentando(usize),
 }
 
+// O estado padrão de uma matriz é prenha a 0 meses
+// Isso é usado no caso de novas matrizes serem criadas ao longo da simulação
 impl Default for MatrizEstado {
     fn default() -> Self {
-        Self::Amamentando(0)
+        Self::Prenha(0)
     }
 }
 
+/// Representa uma matriz, com idade e estado
 #[derive(Debug, PartialEq, Clone)]
 pub struct Matriz {
     pub state: MatrizEstado,
@@ -23,6 +27,7 @@ pub struct Matriz {
 }
 
 impl Matriz {
+    /// Cria uma nova matriz com dada idade
     pub fn new(idade: usize) -> Self {
         Self {
             state: MatrizEstado::default(),
@@ -30,8 +35,14 @@ impl Matriz {
         }
     }
 
+    /// Avança a matriz em um passo
     pub fn step(&mut self, env: &Ambiente) -> Option<SimEvento> {
         self.idade += 1;
+
+        // Mata a matriz caso necessário
+        if self.idade >= env.config.tempo_vida_matriz {
+            return Some(SimEvento::MorteMatriz(self.clone()));
+        }
 
         match self.state {
             MatrizEstado::Amamentando(x) => {
@@ -51,13 +62,10 @@ impl Matriz {
             }
         }
 
-        if self.idade >= env.config.tempo_vida_matriz {
-            return Some(SimEvento::MorteMatriz(self.clone()));
-        }
-
         None
     }
 
+    /// Faz um parto
     fn parto(&self, env: &Ambiente) -> Vec<Cabrito> {
         let n_filhos = crate::rng_logic::parto(&env.config.filhos_por_100_partos);
         let mut filhos = vec![];

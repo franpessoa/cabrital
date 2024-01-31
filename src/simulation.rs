@@ -1,5 +1,6 @@
 use crate::{cabrito::Cabrito, matriz::Matriz};
 
+/// Estrutura que representa a simulação completa
 #[derive(Debug, PartialEq)]
 pub struct Sim {
     pub matrizes: Vec<Matriz>,
@@ -10,6 +11,7 @@ pub struct Sim {
     pub current_step: SimStep,
 }
 
+/// Configurações da simulação que serão lidas do arquivo TOML de configuração
 #[derive(serde_derive::Deserialize, Debug, PartialEq)]
 pub struct SimConfig {
     pub filhos_por_100_partos: usize,
@@ -25,15 +27,19 @@ pub struct SimConfig {
     pub rt_meses: usize,
 }
 
+/// Representa um evento que muda o estado da simulação
+/// Qualquer tipo de mudança no objeto `Sim` que uma entidade quiser fazer deve ser na forma de um evento
+/// Isso garante que todas as mudanças passem por um controle central
 #[derive(Clone, Debug, PartialEq)]
 pub enum SimEvento {
     Parto(Vec<Cabrito>),
     Abate(Cabrito),
     MorteMatriz(Matriz),
-    NewMatriz(Matriz, Cabrito),
+    NovaMatriz(Matriz, Cabrito),
 }
 
-#[derive(Debug, PartialEq, Default, Clone, Copy)]
+/// Representa a saída de um mês
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub struct SimStep {
     pub mes: usize,
     pub matrizes: usize,
@@ -42,6 +48,7 @@ pub struct SimStep {
     pub imediato: SimStepImediato,
 }
 
+/// Representa os dados de saída que são atualizados a cada evento novo
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub struct SimStepImediato {
     pub partos: usize,
@@ -52,6 +59,7 @@ pub struct SimStepImediato {
     pub mortes_matriz: usize,
 }
 
+/// Representa a referência que um cabrito/matriz tem da simulação completa
 #[derive(Debug)]
 pub struct Ambiente<'a> {
     pub config: &'a SimConfig,
@@ -61,6 +69,7 @@ pub struct Ambiente<'a> {
 }
 
 impl Sim {
+    /// Registra um evento
     fn evento(&mut self, e: &SimEvento) {
         match e {
             SimEvento::Parto(c) => {
@@ -82,7 +91,7 @@ impl Sim {
                     }
                 }
             }
-            SimEvento::NewMatriz(m, c) => {
+            SimEvento::NovaMatriz(m, c) => {
                 self.matrizes.push(m.clone());
                 self.current_step.imediato.novas_matrizes += 1;
                 self.cabritos
@@ -97,6 +106,7 @@ impl Sim {
         }
     }
 
+    /// Avança a simulação em um passo
     pub fn step(&mut self) -> SimStep {
         let mut event_register = Vec::with_capacity(self.cabritos.len() + self.matrizes.len());
 
@@ -126,11 +136,12 @@ impl Sim {
             self.evento(&event)
         }
 
-        self.atualliza_imediato();
+        self.atualiza_saida();
         self.current_step
     }
 
-    fn atualliza_imediato(&mut self) {
+    /// Atualiza os dados da saída
+    fn atualiza_saida(&mut self) {
         self.current_step.mes = self.delta_t;
         self.current_step.matrizes = self.matrizes.len();
         self.current_step.cabritos = self.cabritos.len();

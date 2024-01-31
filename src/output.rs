@@ -1,5 +1,7 @@
 /// Escreve o nome das colunas no arquivo
-pub fn write_head<W: std::io::Write>(writer: &mut csv::Writer<W>) -> Result<(), csv::Error> {
+pub fn registra_cabecalho<W: std::io::Write>(
+    writer: &mut csv::Writer<W>,
+) -> Result<(), csv::Error> {
     writer.write_record([
         "Mês",
         "Número de matrizes",
@@ -15,7 +17,7 @@ pub fn write_head<W: std::io::Write>(writer: &mut csv::Writer<W>) -> Result<(), 
 }
 
 /// Escreve o equivalente a um mês no arquivo
-pub fn write_record<W: std::io::Write>(
+pub fn registra_record<W: std::io::Write>(
     writer: &mut csv::Writer<W>,
     record: crate::simulation::SimStep,
 ) -> Result<(), csv::Error> {

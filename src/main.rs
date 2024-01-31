@@ -1,7 +1,7 @@
 use cabritos::{
     cabrito::Cabrito,
     matriz::Matriz,
-    output::{write_head, write_record},
+    output::{registra_cabecalho, registra_record},
     simulation::{Sim, SimConfig, SimStep},
 };
 use chrono::prelude::*;
@@ -18,6 +18,7 @@ struct Args {
     out: Option<String>,
 }
 
+/// Representa o formato usado no arquivo TOML de configuração
 #[derive(Deserialize)]
 struct ConfigFile {
     config: SimConfig,
@@ -49,8 +50,8 @@ fn main() {
 
     let mut steps = Vec::with_capacity(simulation.config.rt_meses);
 
-    for s in 0..simulation.config.rt_meses {
-        tracing::info!("Calculando step {}", s);
+    for n in 0..simulation.config.rt_meses {
+        tracing::info!("Calculando step {}", n);
         steps.push(simulation.step())
     }
 
@@ -58,11 +59,11 @@ fn main() {
 
     let out_path = args.out.unwrap_or(Local::now().to_string());
     let mut writer = csv::Writer::from_path(out_path).unwrap();
-    write_head(&mut writer).unwrap();
+    registra_cabecalho(&mut writer).unwrap();
 
     tracing::info!("Escrevendo resultados");
 
     for dp in steps {
-        write_record(&mut writer, dp).unwrap()
+        registra_record(&mut writer, dp).unwrap()
     }
 }
