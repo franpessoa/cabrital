@@ -17,18 +17,18 @@ pub fn write_head<W: std::io::Write>(writer: &mut csv::Writer<W>) -> Result<(), 
 /// Escreve o equivalente a um mês no arquivo
 pub fn write_record<W: std::io::Write>(
     writer: &mut csv::Writer<W>,
-    record: crate::simulation::SimulationStep,
+    record: crate::simulation::SimStep,
 ) -> Result<(), csv::Error> {
     writer.write_record([
         record.mes.to_string(),
         record.matrizes.to_string(),
         record.cabritos.to_string(),
         record.idade_média_matrizes.to_string(),
-        record.immediate.partos.to_string(),
-        record.immediate.abates.to_string(),
-        record.immediate.abates_femea.to_string(),
-        record.immediate.abates_macho.to_string(),
-        record.immediate.novas_matrizes.to_string(),
-        record.immediate.mortes_matriz.to_string(),
+        record.imediato.partos.to_string(),
+        record.imediato.abates.to_string(),
+        record.imediato.abates_femea.to_string(),
+        record.imediato.abates_macho.to_string(),
+        record.imediato.novas_matrizes.to_string(),
+        record.imediato.mortes_matriz.to_string(),
     ])
 }

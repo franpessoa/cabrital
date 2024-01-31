@@ -2,7 +2,7 @@ use cabritos::{
     cabrito::Cabrito,
     matriz::Matriz,
     output::{write_head, write_record},
-    simulation::{Simulation, SimulationConfig, SimulationStep},
+    simulation::{Sim, SimConfig, SimStep},
 };
 use chrono::prelude::*;
 use clap::Parser;
@@ -20,11 +20,12 @@ struct Args {
 
 #[derive(Deserialize)]
 struct ConfigFile {
-    config: SimulationConfig,
+    config: SimConfig,
 }
 
 fn main() {
-    //tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt::init();
+    tracing::info!("Iniciando simulação");
 
     let args = Args::parse();
     let contents = fs::read_to_string(args.cfg).unwrap();
@@ -38,28 +39,28 @@ fn main() {
         .map(|_| Cabrito::parto_rng())
         .collect::<Vec<Cabrito>>();
 
-    let mut simulation = Simulation {
+    let mut simulation = Sim {
         matrizes,
         cabritos,
         config: config.config,
         delta_t: 0,
-        current_step: SimulationStep::default(),
+        current_step: SimStep::default(),
     };
 
     let mut steps = Vec::with_capacity(simulation.config.rt_meses);
 
     for s in 0..simulation.config.rt_meses {
-        println!("Calculando step {}", s);
+        tracing::info!("Calculando step {}", s);
         steps.push(simulation.step())
     }
 
-    println!("Simulação finalizada");
+    tracing::info!("Simulação finalizada");
 
     let out_path = args.out.unwrap_or(Local::now().to_string());
     let mut writer = csv::Writer::from_path(out_path).unwrap();
     write_head(&mut writer).unwrap();
 
-    println!("Escrevendo resultados");
+    tracing::info!("Escrevendo resultados");
 
     for dp in steps {
         write_record(&mut writer, dp).unwrap()

@@ -2,13 +2,13 @@ use rand::{thread_rng, Rng};
 
 use crate::{
     matriz::Matriz,
-    simulation::{Environment, SimulationEvent},
+    simulation::{Ambiente, SimEvento},
 };
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Cabrito {
     pub age: usize,
-    pub gender: CabritoGenero,
+    pub genero: CabritoGenero,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -28,18 +28,18 @@ impl From<bool> for CabritoGenero {
 
 impl Cabrito {
     /// Checks if the individual can become a matriz imediatly
-    fn can_matriz(&self, env: &Environment) -> bool {
-        self.gender == CabritoGenero::Femea && env.n_matrizes < env.config.teto_matriz
+    fn can_matriz(&self, env: &Ambiente) -> bool {
+        self.genero == CabritoGenero::Femea && env.n_matrizes < env.config.teto_matriz
     }
 
-    pub fn step(&mut self, env: &Environment) -> Option<SimulationEvent> {
+    pub fn step(&mut self, env: &Ambiente) -> Option<SimEvento> {
         self.age += 1;
 
         if self.age >= env.config.idade_abate_cabrito {
             if self.can_matriz(env) {
-                return Some(SimulationEvent::NewMatriz(Matriz::new(self.age), *self));
+                return Some(SimEvento::NewMatriz(Matriz::new(self.age), *self));
             } else {
-                return Some(SimulationEvent::Abate(*self));
+                return Some(SimEvento::Abate(*self));
             }
         }
 
@@ -49,7 +49,7 @@ impl Cabrito {
     pub fn parto_rng() -> Self {
         Self {
             age: 0,
-            gender: CabritoGenero::from(thread_rng().gen::<bool>()),
+            genero: CabritoGenero::from(thread_rng().gen::<bool>()),
         }
     }
 }

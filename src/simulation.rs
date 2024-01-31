@@ -1,17 +1,17 @@
 use crate::{cabrito::Cabrito, matriz::Matriz};
 
 #[derive(Debug, PartialEq)]
-pub struct Simulation {
+pub struct Sim {
     pub matrizes: Vec<Matriz>,
     pub cabritos: Vec<Cabrito>,
-    pub config: SimulationConfig,
+    pub config: SimConfig,
 
     pub delta_t: usize,
-    pub current_step: SimulationStep,
+    pub current_step: SimStep,
 }
 
 #[derive(serde_derive::Deserialize, Debug, PartialEq)]
-pub struct SimulationConfig {
+pub struct SimConfig {
     pub filhos_por_100_partos: usize,
     pub tempo_prenhez_meses: usize,
     pub tempo_amamentando_meses: usize,
@@ -26,7 +26,7 @@ pub struct SimulationConfig {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum SimulationEvent {
+pub enum SimEvento {
     Parto(Vec<Cabrito>),
     Abate(Cabrito),
     MorteMatriz(Matriz),
@@ -34,16 +34,16 @@ pub enum SimulationEvent {
 }
 
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
-pub struct SimulationStep {
+pub struct SimStep {
     pub mes: usize,
     pub matrizes: usize,
     pub cabritos: usize,
     pub idade_média_matrizes: f32,
-    pub immediate: ImmediateEventStep,
+    pub imediato: SimStepImediato,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
-pub struct ImmediateEventStep {
+pub struct SimStepImediato {
     pub partos: usize,
     pub abates: usize,
     pub abates_macho: usize,
@@ -53,57 +53,57 @@ pub struct ImmediateEventStep {
 }
 
 #[derive(Debug)]
-pub struct Environment<'a> {
-    pub config: &'a SimulationConfig,
+pub struct Ambiente<'a> {
+    pub config: &'a SimConfig,
     pub n_matrizes: usize,
     pub n_cabritos: usize,
     pub delta_t: usize,
 }
 
-impl Simulation {
-    fn event(&mut self, e: &SimulationEvent) {
+impl Sim {
+    fn evento(&mut self, e: &SimEvento) {
         match e {
-            SimulationEvent::Parto(c) => {
+            SimEvento::Parto(c) => {
                 self.cabritos.append(&mut c.clone());
-                self.current_step.immediate.partos += c.len()
+                self.current_step.imediato.partos += c.len()
             }
 
-            SimulationEvent::Abate(c) => {
+            SimEvento::Abate(c) => {
                 self.cabritos
                     .remove(self.cabritos.iter().position(|x| x == c).unwrap());
-                self.current_step.immediate.abates += 1;
+                self.current_step.imediato.abates += 1;
 
-                match c.gender {
+                match c.genero {
                     crate::cabrito::CabritoGenero::Femea => {
-                        self.current_step.immediate.abates_femea += 1
+                        self.current_step.imediato.abates_femea += 1
                     }
                     crate::cabrito::CabritoGenero::Macho => {
-                        self.current_step.immediate.abates_macho += 1
+                        self.current_step.imediato.abates_macho += 1
                     }
                 }
             }
-            SimulationEvent::NewMatriz(m, c) => {
+            SimEvento::NewMatriz(m, c) => {
                 self.matrizes.push(m.clone());
-                self.current_step.immediate.novas_matrizes += 1;
+                self.current_step.imediato.novas_matrizes += 1;
                 self.cabritos
                     .remove(self.cabritos.iter().position(|x| x == c).unwrap());
             }
 
-            SimulationEvent::MorteMatriz(m) => {
+            SimEvento::MorteMatriz(m) => {
                 self.matrizes
                     .remove(self.matrizes.iter().position(|x| x == m).unwrap());
-                self.current_step.immediate.mortes_matriz += 1
+                self.current_step.imediato.mortes_matriz += 1
             }
         }
     }
 
-    pub fn step(&mut self) -> SimulationStep {
+    pub fn step(&mut self) -> SimStep {
         let mut event_register = Vec::with_capacity(self.cabritos.len() + self.matrizes.len());
 
-        self.current_step = SimulationStep::default();
+        self.current_step = SimStep::default();
         self.delta_t += 1;
 
-        let env = Environment {
+        let amb = Ambiente {
             config: &self.config,
             n_matrizes: self.matrizes.len(),
             n_cabritos: self.cabritos.len(),
@@ -111,31 +111,31 @@ impl Simulation {
         };
 
         for cabrito in &mut self.cabritos {
-            if let Some(e) = cabrito.step(&env) {
+            if let Some(e) = cabrito.step(&amb) {
                 event_register.push(e)
             }
         }
 
         for matriz in &mut self.matrizes {
-            if let Some(e) = matriz.step(&env) {
+            if let Some(e) = matriz.step(&amb) {
                 event_register.push(e)
             }
         }
 
         for event in event_register {
-            self.event(&event)
+            self.evento(&event)
         }
 
-        self.update_step_fields();
+        self.atualliza_imediato();
         self.current_step
     }
 
-    fn update_step_fields(&mut self) {
+    fn atualliza_imediato(&mut self) {
         self.current_step.mes = self.delta_t;
         self.current_step.matrizes = self.matrizes.len();
         self.current_step.cabritos = self.cabritos.len();
-        self.current_step.idade_média_matrizes = self.matrizes.iter().map(|x| x.age).sum::<usize>()
-            as f32
-            / self.current_step.matrizes as f32
+        self.current_step.idade_média_matrizes =
+            self.matrizes.iter().map(|x| x.idade).sum::<usize>() as f32
+                / self.current_step.matrizes as f32
     }
 }
