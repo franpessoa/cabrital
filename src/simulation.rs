@@ -1,4 +1,5 @@
 use crate::{cabrito::Cabrito, matriz::Matriz};
+use rayon::prelude::*;
 
 /// Estrutura que representa a simulação completa
 #[derive(Debug, PartialEq)]
@@ -120,17 +121,35 @@ impl Sim {
             delta_t: self.delta_t,
         };
 
-        for cabrito in &mut self.cabritos {
-            if let Some(e) = cabrito.step(&amb) {
-                event_register.push(e)
-            }
-        }
+        // for cabrito in &mut self.cabritos {
+        //     if let Some(e) = cabrito.step(&amb) {
+        //         event_register.push(e)
+        //     }
+        // }
 
-        for matriz in &mut self.matrizes {
-            if let Some(e) = matriz.step(&amb) {
-                event_register.push(e)
-            }
-        }
+        event_register.append(
+            &mut self
+                .cabritos
+                .par_iter_mut()
+                .map(|x| x.step(&amb))
+                .flatten()
+                .collect::<Vec<_>>(),
+        );
+
+        // for matriz in &mut self.matrizes {
+        //     if let Some(e) = matriz.step(&amb) {
+        //         event_register.push(e)
+        //     }
+        // }
+
+        event_register.append(
+            &mut self
+                .matrizes
+                .par_iter_mut()
+                .map(|x| x.step(&amb))
+                .flatten()
+                .collect::<Vec<_>>(),
+        );
 
         for event in event_register {
             self.evento(&event)
