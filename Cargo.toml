@@ -1,5 +1,5 @@
 [package]
-name = "cabritos"
+name = "cabrital"
 version = "0.1.0"
 edition = "2021"
 
@@ -16,3 +16,6 @@ serde_derive = "1.0.196"
 toml = "0.8.8"
 tracing = { version = "0.1.40", features = ["attributes"] }
 tracing-subscriber = "0.3.18"
+
+[profile.release]
+debug = true
