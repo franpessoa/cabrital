@@ -1,5 +1,5 @@
 [package]
-name = "cabrital"
+name = "cabritos"
 version = "0.1.0"
 edition = "2021"
 
@@ -18,5 +18,3 @@ toml = "0.8.8"
 tracing = { version = "0.1.40", features = ["attributes"] }
 tracing-subscriber = "0.3.18"
 
-[profile.release]
-debug = true

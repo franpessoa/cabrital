@@ -1,4 +1,4 @@
-use cabrital::{
+use cabritos::{
     cabrito::Cabrito,
     matriz::Matriz,
     output::{registra_cabecalho, registra_record},
