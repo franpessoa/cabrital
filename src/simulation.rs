@@ -121,12 +121,6 @@ impl Sim {
             delta_t: self.delta_t,
         };
 
-        // for cabrito in &mut self.cabritos {
-        //     if let Some(e) = cabrito.step(&amb) {
-        //         event_register.push(e)
-        //     }
-        // }
-
         event_register.append(
             &mut self
                 .cabritos
@@ -135,12 +129,6 @@ impl Sim {
                 .flatten()
                 .collect::<Vec<_>>(),
         );
-
-        // for matriz in &mut self.matrizes {
-        //     if let Some(e) = matriz.step(&amb) {
-        //         event_register.push(e)
-        //     }
-        // }
 
         event_register.append(
             &mut self
