@@ -2,7 +2,7 @@ use cabritos::{
     cabrito::Cabrito,
     matriz::Matriz,
     output::{registra_cabecalho, registra_record},
-    simulation::{Sim, SimConfig, SimStep},
+    simulation::{Sim, SimConfig},
 };
 use chrono::prelude::*;
 use clap::Parser;
@@ -45,7 +45,6 @@ fn main() {
         cabritos,
         config: config.config,
         delta_t: 0,
-        current_step: SimStep::default(),
     };
 
     let mut steps = Vec::with_capacity(simulation.config.rt_meses);

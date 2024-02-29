@@ -29,7 +29,7 @@ impl From<bool> for CabritoGenero {
 impl Cabrito {
     /// Checks if the individual can become a matriz imediatly
     fn can_matriz(&self, env: &Ambiente) -> bool {
-        self.genero == CabritoGenero::Femea && env.n_matrizes < env.config.teto_matriz
+        self.genero == CabritoGenero::Femea && env.n_matrizes.get() < env.config.teto_matriz
     }
 
     pub fn step(&mut self, env: &Ambiente) -> Option<SimEvento> {
