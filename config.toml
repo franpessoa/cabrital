@@ -8,5 +8,6 @@ tempo_vida_matriz = 20
 teto_matriz = 2000
 init_matrizes = 100
 init_cabritos = 500
-init_matrizes_idade = 0
+# init_matrizes_idade = 0
+# init_cabritos_idade = 0
 rt_meses = 240

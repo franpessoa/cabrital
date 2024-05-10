@@ -1,6 +1,5 @@
-use std::cell::Cell;
-
 use crate::{cabrito::Cabrito, matriz::Matriz};
+use std::cell::Cell;
 
 /// Estrutura que representa a simulação completa
 #[derive(Debug, PartialEq)]
@@ -23,7 +22,8 @@ pub struct SimConfig {
     pub teto_matriz: usize,
     pub init_matrizes: usize,
     pub init_cabritos: usize,
-    pub init_matrizes_idade: usize,
+    pub init_matrizes_idade: Option<usize>,
+    pub init_cabritos_idade: Option<usize>,
     pub rt_meses: usize,
 }
 
@@ -36,6 +36,7 @@ pub enum SimEvento {
     Abate(Cabrito),
     MorteMatriz(Matriz),
     NovaMatriz(Matriz, Cabrito),
+    MaybeMatriz(Cabrito),
 }
 
 /// Representa a saída de um mês
@@ -64,8 +65,12 @@ pub struct SimStepImediato {
 pub struct Ambiente<'a> {
     pub config: &'a SimConfig,
     pub n_matrizes: Cell<usize>,
-    pub n_cabritos: usize,
-    pub delta_t: usize,
+}
+
+pub trait Simulável {
+    fn step(&mut self, amb: &Ambiente) -> Option<SimEvento>;
+    fn parto_rng(max_idade: usize) -> Self;
+    fn new_por_idade(idade: usize) -> Self;
 }
 
 impl Sim {
@@ -83,12 +88,8 @@ impl Sim {
                 step.imediato.abates += 1;
 
                 match c.genero {
-                    crate::cabrito::CabritoGenero::Femea => {
-                        step.imediato.abates_femea += 1
-                    }
-                    crate::cabrito::CabritoGenero::Macho => {
-                        step.imediato.abates_macho += 1
-                    }
+                    crate::cabrito::CabritoGenero::Femea => step.imediato.abates_femea += 1,
+                    crate::cabrito::CabritoGenero::Macho => step.imediato.abates_macho += 1,
                 }
             }
             SimEvento::NovaMatriz(m, c) => {
@@ -103,6 +104,14 @@ impl Sim {
                     .remove(self.matrizes.iter().position(|x| x == m).unwrap());
                 step.imediato.mortes_matriz += 1
             }
+
+            SimEvento::MaybeMatriz(c) => {
+                if self.matrizes.len() < self.config.teto_matriz {
+                    self.evento(&SimEvento::NovaMatriz(Matriz::from(c.clone()), *c), step)
+                } else {
+                    self.evento(&SimEvento::Abate(*c), step)
+                }
+            }
         }
     }
 
@@ -116,10 +125,12 @@ impl Sim {
         let amb = Ambiente {
             config: &self.config.clone(),
             n_matrizes: self.matrizes.len().into(),
-            n_cabritos: self.cabritos.len().into(),
-            delta_t: self.delta_t,
         };
 
+        // Processa os eventos das matrizes
+        // `self.evento()` DEVE ser chamado nas matrizes ANTES dos cabritos
+        // para que os eventos `SimEvento::MaybeMatriz` emitidos pelos cabritos sejam
+        // processados com um número atualizado de matrizes
         for matriz in &mut self.matrizes {
             if let Some(x) = matriz.step(&amb) {
                 event_register.push(x);
@@ -133,6 +144,7 @@ impl Sim {
 
         event_register.clear();
 
+        // Processa os eventos dos cabritos
         for cabrito in &mut self.cabritos {
             if let Some(x) = cabrito.step(&amb) {
                 if let &SimEvento::NovaMatriz(_, _) = &x {
@@ -157,7 +169,6 @@ impl Sim {
         step.matrizes = self.matrizes.len();
         step.cabritos = self.cabritos.len();
         step.idade_média_matrizes =
-            self.matrizes.iter().map(|x| x.idade).sum::<usize>() as f32
-                / step.matrizes as f32
+            self.matrizes.iter().map(|x| x.idade).sum::<usize>() as f32 / step.matrizes as f32
     }
 }

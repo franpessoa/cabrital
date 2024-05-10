@@ -2,7 +2,7 @@ use cabritos::{
     cabrito::Cabrito,
     matriz::Matriz,
     output::{registra_cabecalho, registra_record},
-    simulation::{Sim, SimConfig},
+    simulation::{Sim, SimConfig, Simulável},
 };
 use chrono::prelude::*;
 use clap::Parser;
@@ -24,6 +24,13 @@ struct ConfigFile {
     config: SimConfig,
 }
 
+fn eval_novo_ind<T: Simulável>(idade: Option<usize>, max_idade: usize) -> T {
+    match idade {
+        Some(i) => T::new_por_idade(i),
+        None => T::parto_rng(max_idade),
+    }
+}
+
 fn main() {
     tracing_subscriber::fmt::init();
     tracing::info!("Iniciando simulação");
@@ -32,12 +39,22 @@ fn main() {
     let contents = fs::read_to_string(args.cfg).unwrap();
     let config: ConfigFile = toml::from_str(&contents).unwrap();
 
-    let matrizes = (0..100)
-        .map(|_| Matriz::new(config.config.init_matrizes_idade))
+    let matrizes = (0..config.config.init_matrizes)
+        .map(|_| {
+            eval_novo_ind::<Matriz>(
+                config.config.init_matrizes_idade,
+                config.config.tempo_vida_matriz,
+            )
+        })
         .collect::<Vec<Matriz>>();
 
-    let cabritos = (0..100)
-        .map(|_| Cabrito::parto_rng())
+    let cabritos = (0..config.config.init_cabritos)
+        .map(|_| {
+            eval_novo_ind::<Cabrito>(
+                config.config.init_cabritos_idade,
+                config.config.idade_abate_cabrito,
+            )
+        })
         .collect::<Vec<Cabrito>>();
 
     let mut simulation = Sim {
